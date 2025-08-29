@@ -1,0 +1,409 @@
+shared:
+  input_data_datetime_column: &input_data_datetime_column date # input data's original timestamp column.
+  datetime_column: &datetime_column "timestamp"
+  target_column: &target_column "silica_conc"
+  baseline_column: &baseline_column "model_prediction"
+
+preprocessing:
+  datetime_col: *input_data_datetime_column # input data's original timestamp column.
+  unified_timestamp: *datetime_column
+  # different frequency aliases can be found here:
+  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
+  round_timestamps_frequency: "1h"
+  outliers_rule: drop #currently, we have 'clip' and 'drop'. 'drop' replaces outlier values to null
+  interpolate_kwargs:
+    # different interpolating kwargs can be found here:
+    # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.interpolate.html
+    limit: 5
+  resample_errors: coerce # 'raise' or 'coerce'. 'coerce' uses default method
+
+feature_factory:
+  feature_config:
+  # Name of the new feature to be produced and included in the dataset
+    total_air_flow:
+  # List of features used in `total_air_flow` feature calculation
+      dependencies: 
+        - air_flow01
+        - air_flow02
+        - air_flow03
+        - air_flow04
+        - air_flow05
+        - air_flow06
+        - air_flow07
+  # Aggregation function that is applied on features from `dependencies` list
+      function: feature_factory.sample_function.pandas_sum
+
+    total_column_level:
+      dependencies: 
+        - column_level01
+        - column_level02
+        - column_level03
+        - column_level04
+        - column_level05
+        - column_level06
+        - column_level07
+      function: feature_factory.sample_function.pandas_sum
+    
+    iron_minus_silica:
+      dependencies: [iron_feed, silica_feed]
+      function: feature_factory.sample_function.pandas_subtract
+
+    feed_diff_divide_silica:
+      dependencies: [iron_minus_silica, silica_feed]
+      function: feature_factory.sample_function.pandas_divide
+  target_column: *target_column
+
+feature_report:
+  target_column: *target_column
+  model_features:
+  - iron_feed
+  - silica_feed
+  - starch_flow
+  - amina_flow
+  - ore_pulp_flow
+  - ore_pulp_ph
+  - ore_pulp_density
+  - total_air_flow
+  - total_column_level
+  - feed_diff_divide_silica
+  - silica_conc_lagged
+  datetime_column: *datetime_column
+  report_title: Silica Concentration Model Feature Overview Report
+
+modeling:
+  model_name: silica_conc_sgd_regressor
+  target_column: *target_column
+  model_features:
+  - iron_feed
+  - silica_feed
+  - starch_flow
+  - amina_flow
+  - ore_pulp_flow
+  - ore_pulp_ph
+  - ore_pulp_density
+  - total_air_flow
+  - total_column_level
+  - feed_diff_divide_silica
+  - silica_conc_lagged
+  split_method: date
+  splitting_parameters:
+    datetime_column: *datetime_column
+    split_datetime: '2025-06-30 23:00:00'
+  model_factory_type: modeling.SklearnPipelineFactory
+  model_init_config:
+    estimator:
+      class_name: sklearn.linear_model.SGDRegressor
+      kwargs:
+        random_state: 123
+        penalty: elasticnet
+    transformers:
+    - class_name: sklearn.preprocessing.StandardScaler
+      kwargs: {}
+      name: standard_scaler
+      wrapper: preserve_columns
+  model_tuner_type: modeling.SklearnPipelineTuner
+  tuner_config:
+    class_name: sklearn.model_selection.GridSearchCV
+    kwargs:
+      n_jobs: -1
+      refit: mae
+      param_grid:
+        estimator__alpha:
+        - 0.0001
+        - 0.001
+        - 0.01
+        - 0.1
+        - 1
+        - 10
+        estimator__l1_ratio:
+        - 1.0e-05
+        - 0.0001
+        - 0.001
+        - 0.01
+        - 0.1
+        - 1
+        estimator__n_iter_no_change:
+        - 5
+        - 10
+        - 20
+      scoring:
+        mae: neg_mean_absolute_error
+        rmse: neg_root_mean_squared_error
+        r2: r2
+  hyperparameters: null
+  cv_strategy_config:
+    class_name: sklearn.model_selection.TimeSeriesSplit
+    kwargs:
+      n_splits: 3
+
+modeling_report:
+  timestamp_column: *datetime_column
+  report_title: Silica Concentration Model Performance Report
+
+optimization:
+  controlled_parameters:
+  - name: starch_flow
+    op_min: 3000
+    op_max: 4000
+    step_size: 200
+    max_delta: 800
+  - name: amina_flow
+    op_min: 450
+    op_max: 650
+    step_size: 50
+    max_delta: 100
+  - name: ore_pulp_flow
+    op_min: 400
+    op_max: 410
+    step_size: 2
+    max_delta: 10
+  - name: ore_pulp_ph
+    op_min: 9.5
+    op_max: 10.5
+    step_size: 0.05
+    max_delta: 0.4
+  - name: ore_pulp_density
+    op_min: 1.65
+    op_max: 1.75
+    step_size: 0.1
+    max_delta: 0.1
+  - name: total_air_flow
+    op_min: 1000
+    op_max: 2000
+    step_size: 100
+    max_delta: 500
+  - name: total_column_level
+    op_min: 1000
+    op_max: 5000
+    step_size: 200
+    max_delta: 1000
+  problem_spec:
+    type: optimizer.problem.StatefulOptimizationProblem
+    kwargs:
+      sense: minimize
+  problem_factory_class: src.problem_factory.SilicaProblemFactory
+  solver:
+    type: optimizer.solvers.DifferentialEvolutionSolver
+    kwargs:
+      sense: minimize
+      seed: 0
+      maxiter: 100
+      mutation:
+      - 0.5
+      - 1.0
+      recombination: 0.7
+      strategy: best1bin
+  stopper:
+    type: optimizer.stoppers.NoImprovementStopper
+    kwargs:
+      patience: 10
+      min_delta: 0.1
+      sense: minimize
+  n_jobs: 1
+  backend: loky
+  objective_units: '%'
+  target_column: *target_column
+  report_title: Counterfactual Analysis Report
+
+baseline_modeling:
+  model_name: silica_conc_ridge_regressor
+  target_column: silica_conc
+  model_features:
+  - iron_feed
+  - silica_feed
+  - feed_diff_divide_silica
+  split_method: last_window
+  splitting_parameters:
+    datetime_column: timestamp
+    freq: 14D
+  model_factory_type: modeling.SklearnPipelineFactory
+  model_init_config:
+    estimator:
+      class_name: sklearn.linear_model.Ridge
+      kwargs:
+        random_state: 123
+        max_iter: 1000
+    transformers:
+    - class_name: sklearn.preprocessing.StandardScaler
+      kwargs: {}
+      name: standard_scaler
+      wrapper: preserve_columns
+  model_tuner_type: modeling.SklearnPipelineTuner
+  tuner_config:
+    class_name: sklearn.model_selection.GridSearchCV
+    kwargs:
+      n_jobs: -1
+      refit: mae
+      param_grid:
+        estimator__alpha:
+        - 0.05
+        - 0.1
+        - 0.2
+        - 0.3
+        - 0.4
+        - 0.5
+        - 0.6
+      scoring:
+        mae: neg_mean_absolute_error
+        rmse: neg_root_mean_squared_error
+        r2: r2
+      cv: 5
+  hyperparameters: null
+  cv_strategy_config: null
+
+calculate_impact:
+  counterfactual_type: uplift
+  target_column: *target_column
+  datetime_column: *datetime_column
+  baseline_column: *baseline_column
+  after_implementation_column: value_after_recs
+  original_granularity: 3H
+  group_characteristics:
+    low_silica:
+      silica_conc:
+        lower_value: 0.0
+        upper_value: 3.0
+    high_silica:
+      silica_conc:
+        lower_value: 3.0
+        upper_value: 50.0
+  default_group: other_group
+  agg_granularity: 3H
+  agg_granularity_function: sum
+  agg_granularity_method: block
+  baseline_alternative_hypothesis: two-sided
+  uplifts_alternative_hypothesis: less
+  annualize_impact: true
+
+sample_live_data:
+  single_sample: false
+
+live_predictions:
+  anomaly_parameters:
+    preprocessing.MissingValuesDetector:
+      time_window: 3H
+      threshold: 0.5
+    preprocessing.RangeDetector:
+      time_window: 3H
+      threshold: 0.5
+      tag_range:
+        iron_feed:
+        - 30
+        - 70
+        silica_feed:
+        - 0
+        - 35
+        ore_pulp_ph:
+        - 8.5
+        - 12
+  tags_to_monitor:
+  - iron_feed
+  - silica_feed
+  - ore_pulp_ph
+  datetime_column: *datetime_column
+  target_column: *target_column
+  error_metric: rmse
+  error_multiplier: 1.96
+  counterfactual_type: uplift
+  n_jobs: -1
+
+update_db:
+  datetime_column: *datetime_column
+  iso_format: '%Y-%m-%dT%H:%M:%SZ'
+  plant_name: plant_1
+  target_column: *target_column
+  controlled_parameters:
+  - max_delta: 800
+    name: starch_flow
+    op_max: 4000
+    op_min: 3000
+    step_size: 200
+  - max_delta: 100
+    name: amina_flow
+    op_max: 650
+    op_min: 450
+    step_size: 50
+  - max_delta: 10
+    name: ore_pulp_flow
+    op_max: 410
+    op_min: 400
+    step_size: 2
+  - max_delta: 0.4
+    name: ore_pulp_ph
+    op_max: 10.5
+    op_min: 9.5
+    step_size: 0.05
+  - max_delta: 0.1
+    name: ore_pulp_density
+    op_max: 1.75
+    op_min: 1.65
+    step_size: 0.1
+  - max_delta: 500
+    name: total_air_flow
+    op_max: 2000
+    op_min: 1000
+    step_size: 100
+  - max_delta: 1000
+    name: total_column_level
+    op_max: 5000
+    op_min: 1000
+    step_size: 200
+  plant_info:
+  - clear_name: Iron Concentration
+    id: cf1f3202-3db8-46c5-babf-99981853911c
+    section: states
+    tag: iron_conc
+    unit: '%'
+  - clear_name: Iron Feed
+    id: 2432fe1e-0c9a-4576-8b84-dd6e29ca83f0
+    section: states
+    tag: iron_feed
+    unit: cc/min
+  - clear_name: Silica Feed
+    id: 5eee8d00-194d-47fa-ab5a-a774f689957d
+    section: states
+    tag: silica_feed
+    unit: cc/min
+  tags_meta:
+  - clear_name: Starch Flow
+    id: ec60d156-eb79-41b0-a907-ccedf677da9a
+    tag: starch_flow
+    tolerance: 400
+    unit: cc/min
+  - clear_name: Amina Flow
+    id: 4206e334-b1ca-4639-8808-e83e3c3be395
+    tag: amina_flow
+    tolerance: 4
+    unit: cc/min
+  - clear_name: Ore Pulp Flow
+    id: 4011b8b6-c59b-4e0d-9779-21d8c190b04b
+    tag: ore_pulp_flow
+    tolerance: 5
+    unit: cc/min
+  - clear_name: Ore Pulp pH
+    id: 371f1681-6cae-4dc0-abc2-5e8e6a6a116b
+    tag: ore_pulp_ph
+    tolerance: 0.3
+    unit: ph
+  - clear_name: Ore Pulp Density
+    id: b57d45f0-7c63-4c5b-8b34-266df9be2e26
+    tag: ore_pulp_density
+    tolerance: 0.1
+    unit: density
+  - clear_name: Total air flow
+    id: c92c2fa6-c564-4c9e-8da9-122254e04f4e
+    tag: total_air_flow
+    tolerance: 100
+    unit: cc/min
+  - clear_name: total column level
+    id: 0a7bdcea-9c87-44c5-a52f-ec64b7fce7eb
+    tag: total_column_level
+    tolerance: 300
+    unit: cc/min
+  targets_meta:
+  - aggregation: avg
+    id: 7d583622-e55e-49df-9978-6d2b4bcaa5c3
+    name: Silica concentration
+    objective: min
+    tag: silica_conc
+    unit: '%'
