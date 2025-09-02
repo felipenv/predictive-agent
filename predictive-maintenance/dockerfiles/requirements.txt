@@ -1,0 +1,31 @@
+itables==2.4.4
+mlrun[kfp]==1.9.1
+kfp==1.8.22
+kfp-pipeline-spec==0.1.16
+kfp-server-api==1.8.5
+protobuf==3.20.3
+s3fs==2024.6.1
+sqlalchemy==2.0.41
+psycopg2-binary==2.9.10
+
+
+# Python version requirement: >=3.8, <3.12
+# Note: Nixtla packages work best with Python 3.8-3.11
+
+
+# Nixtla for time series forecasting
+neuralforecast
+datasetsforecast
+utilsforecast
+
+# PyTorch (required by neuralforecast)
+torch>=1.13.0,<2.1.0
+
+# Visualization
+matplotlib>=3.5.0,<3.8.0
+seaborn>=0.11.0,<0.13.0
+
+
+# PyTorch Lightning (required by neuralforecast)
+pytorch-lightning>=1.9.0,<2.1.0
+
