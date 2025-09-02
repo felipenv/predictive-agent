@@ -8,8 +8,8 @@ from kfp import dsl
 
 @dsl.pipeline()
 def pipeline(
-    Y_train_df: str,
-    Y_test_df: str,
+    y_train_df: str,
+    y_test_df: str,
 ):
     project = mlrun.get_current_project()
     # Add project directory to the system path
@@ -23,11 +23,16 @@ def pipeline(
     preprocessing_run = project.run_function(
         function=preprocessing_fn,
         inputs={
-            "Y_train_df": Y_train_df,
-            "Y_test_df": Y_test_df,
+            "Y_train_df": y_train_df,
+            "Y_test_df": y_test_df,
         },
+        returns=[
+            {"key": "full_data_normalized", "file_format": "csv"},  # ✅ Makes logged dataset accessible
+        ],
         local=False,
     )
+
+    print(preprocessing_run.outputs.keys())
 
     feature_fn = project.get_function("feature")
     feature_run = project.run_function(
@@ -35,6 +40,9 @@ def pipeline(
         inputs={
             "Y_full_data_normalized": preprocessing_run.outputs["full_data_normalized"],
         },
+        returns=[
+            {"key": "Y_full_data_features", "file_format": "csv"},  # ✅ Makes logged dataset accessible
+        ],
         local=False,
     )
     train_fn = project.get_function("train")
