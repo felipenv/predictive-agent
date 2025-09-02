@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: test-agent
+spec:
+  prompt: You are helpful agent that uses tools to assist users.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      name: mlrun-agent
+

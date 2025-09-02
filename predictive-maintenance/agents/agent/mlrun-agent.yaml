@@ -1,0 +1,14 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: mlrun-operator
+spec:
+  prompt: You specialize in managing MLRun resources and workflows.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      labelSelector:
+        matchLabels:
+          mcp/server: mlrun-predictive
+

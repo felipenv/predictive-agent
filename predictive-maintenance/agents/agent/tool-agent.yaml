@@ -1,0 +1,17 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: mlrun-agent
+spec:
+  type: agent
+  description: A tool to perform mlrun operations.
+  inputSchema:
+    type: object
+    properties:
+      question:
+        description: question to be answered by the agent 
+        type: string
+    required:
+    - question
+  agent:
+    name: mlrun-agent

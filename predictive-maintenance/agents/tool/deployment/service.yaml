@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlrun-predictive
+spec:
+  selector:
+    app: mlrun-predictive
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+  type: ClusterIP
