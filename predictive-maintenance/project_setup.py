@@ -1,6 +1,32 @@
 import os
 import mlrun
 
+# Env vars your MinIO-backed MLRun CE needs inside every runtime pod
+MINIO_KEYS = [
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "S3_ENDPOINT_URL",
+    "S3_USE_HTTPS",
+    "S3_VERIFY_SSL",
+    "AWS_DEFAULT_REGION",
+    "S3_NON_ANONYMOUS",
+    "S3_USE_PATH_STYLE",  # important for MinIO path-style addressing
+]
+
+
+def _inject_minio_env(fn: mlrun.runtimes.KubejobRuntime) -> None:
+    """
+    Inject MinIO/S3 environment variables into the function's runtime pod.
+    Uses plain env vars (compatible with MLRun 1.9.x KubejobRuntime).
+    """
+    # Ensure path-style on MinIO (safe even if already set)
+    os.environ.setdefault("S3_USE_PATH_STYLE", "1")
+
+    for key in MINIO_KEYS:
+        value = os.getenv(key)
+        if value is not None:
+            fn.set_env(key, value)
+
 
 def setup(project: mlrun.projects.MlrunProject) -> mlrun.projects.MlrunProject:
     source = project.get_param("source")
@@ -24,28 +50,28 @@ def setup(project: mlrun.projects.MlrunProject) -> mlrun.projects.MlrunProject:
     if default_image:
         project.set_default_image(default_image)
 
-    # # Register project functions for predictive maintenance
-    # functions = {
-    #     "data-preprocessing": (
-    #         "src/functions/data_preprocessing_fn.py",
-    #         "preprocess_sensor_data",
-    #         True,
-    #     ),
-    #     "feature-engineering": (
-    #         "src/functions/feature_engineering_fn.py",
-    #         "engineer_features",
-    #         True,
-    #     ),
-    #     "model-training": (
-    #         "src/functions/model_training_fn.py",
-    #         "train_models",
-    #         True,
-    #     ),
-    #     "failure-prediction": (
-    #         "src/functions/failure_prediction_fn.py",
-    #         "predict_failures",
-    #         True,
-    #     ),
+    # Register project functions for predictive maintenance
+    functions = {
+        "preprocessing": (
+            "src/functions/preprocessing_fn.py",
+            "input_data",
+            True,
+        ),
+        "feature": (
+            "src/functions/feature_fn.py",
+            "feat_creation",
+            True,
+        ),
+        "train": (
+            "src/functions/train_fn.py",
+            "train_model",
+            True,
+        ),
+        "prediction": (
+            "src/functions/prediction_fn.py",
+            "predict",
+            True,
+        ),
     #     "maintenance-recommendation": (
     #         "src/functions/maintenance_recommendation_fn.py",
     #         "recommend_maintenance",
@@ -71,17 +97,18 @@ def setup(project: mlrun.projects.MlrunProject) -> mlrun.projects.MlrunProject:
     #         "analyze_maintenance_impact",
     #         True,
     #     ),
-    # }
+    }
 
-    # for name, (func_path, handler, with_repo) in functions.items():
-    #     fn = project.set_function(
-    #         name=name,
-    #         func=func_path,
-    #         handler=handler,
-    #         kind="job",
-    #         with_repo=with_repo,
-    #     )
-    #     fn.spec.image_pull_policy = "IfNotPresent"
+    for name, (func_path, handler, with_repo) in functions.items():
+        fn = project.set_function(
+            name=name,
+            func=func_path,
+            handler=handler,
+            kind="job",
+            with_repo=with_repo,
+        )
+        fn.spec.image_pull_policy = "IfNotPresent"
+        _inject_minio_env(fn)
 
     # # Set up workflows
     # project.set_workflow(

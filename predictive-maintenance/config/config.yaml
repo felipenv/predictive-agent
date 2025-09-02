@@ -1,3 +1,0 @@
-DATA_DIR: "optimus/data"
-OPTIMUS_DIR: "optimus/src"
-MLRUN_ENV_FILE: "mlrun.env"
