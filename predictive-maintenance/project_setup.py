@@ -72,31 +72,6 @@ def setup(project: mlrun.projects.MlrunProject) -> mlrun.projects.MlrunProject:
             "predict",
             True,
         ),
-    #     "maintenance-recommendation": (
-    #         "src/functions/maintenance_recommendation_fn.py",
-    #         "recommend_maintenance",
-    #         True,
-    #     ),
-    #     "parts-inventory": (
-    #         "src/functions/parts_inventory_fn.py",
-    #         "check_parts_availability",
-    #         True,
-    #     ),
-    #     "rag-manual-search": (
-    #         "src/functions/rag_manual_search_fn.py",
-    #         "search_maintenance_manuals",
-    #         True,
-    #     ),
-    #     "maintenance-scheduler": (
-    #         "src/functions/maintenance_scheduler_fn.py",
-    #         "schedule_maintenance",
-    #         True,
-    #     ),
-    #     "impact-analysis": (
-    #         "src/functions/impact_analysis_fn.py",
-    #         "analyze_maintenance_impact",
-    #         True,
-    #     ),
     }
 
     for name, (func_path, handler, with_repo) in functions.items():
@@ -110,22 +85,18 @@ def setup(project: mlrun.projects.MlrunProject) -> mlrun.projects.MlrunProject:
         fn.spec.image_pull_policy = "IfNotPresent"
         _inject_minio_env(fn)
 
-    # # Set up workflows
-    # project.set_workflow(
-    #     name="training-workflow",
-    #     workflow_path="src/workflows/training_workflow.py",
-    #     image=default_image,
-    # )
+    # Set up workflows
+    project.set_workflow(
+        name="training-workflow",
+        workflow_path="src/workflows/training_workflow.py",
+        image=default_image,
+    )
     # project.set_workflow(
     #     name="inference-workflow",
     #     workflow_path="src/workflows/inference_workflow.py",
     #     image=default_image,
     # )
-    # project.set_workflow(
-    #     name="maintenance-workflow",
-    #     workflow_path="src/workflows/maintenance_workflow.py",
-    #     image=default_image,
-    # )
+
 
     project.save()
     return project
