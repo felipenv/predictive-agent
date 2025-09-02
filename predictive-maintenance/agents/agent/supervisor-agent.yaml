@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: supervisor-agent
+spec:
+  prompt: You are a supervisor agent. You have access to tools that are agents that can perform tasks. Use the tools when needed and reply the users requests accurately.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      name: mlrun-agent-as-tool
+

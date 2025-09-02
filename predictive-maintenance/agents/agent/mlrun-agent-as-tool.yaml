@@ -1,7 +1,7 @@
 apiVersion: ark.mckinsey.com/v1alpha1
 kind: Tool
 metadata:
-  name: mlrun-agent
+  name: mlrun-agent-as-tool
 spec:
   type: agent
   description: A tool to perform mlrun operations.
@@ -9,9 +9,9 @@ spec:
     type: object
     properties:
       question:
-        description: question to be answered by the agent 
+        description: A question or an action request related to mlrun platform to be performed by the agent.
         type: string
     required:
     - question
   agent:
-    name: mlrun-agent
+    name: mlrun-operator
