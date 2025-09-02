@@ -103,6 +103,10 @@ def setup(project: mlrun.projects.MlrunProject) -> mlrun.projects.MlrunProject:
         workflow_path="src/workflows/training_workflow.py",
         image=default_image,
     )
-
+    project.set_workflow(
+        name="inference-workflow",
+        workflow_path="src/workflows/inference_workflow.py",
+        image=default_image,
+    )
     project.save()
     return project
