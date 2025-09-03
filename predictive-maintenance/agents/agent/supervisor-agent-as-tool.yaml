@@ -1,0 +1,17 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: supervisor-agent-as-tool
+spec:
+  type: agent
+  description: A tool to perform supervisor operations.
+  inputSchema:
+    type: object
+    properties:
+      question:
+        description: A tool to answer any question or an action request related to maintenance, procurement or mlrun.
+        type: string
+    required:
+    - question
+  agent:
+    name: supervisor-agent

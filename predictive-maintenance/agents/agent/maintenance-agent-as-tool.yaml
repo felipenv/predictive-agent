@@ -1,0 +1,17 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: maintenance-agent-as-tool
+spec:
+  type: agent
+  description: A tool to perform maintenance operations.
+  inputSchema:
+    type: object
+    properties:
+      question:
+        description: A question or an action request related to maintenance database to be performed by the agent.
+        type: string
+    required:
+    - question
+  agent:
+    name: maintenance-operator

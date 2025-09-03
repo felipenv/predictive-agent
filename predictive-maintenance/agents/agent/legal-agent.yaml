@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: legal-agent
+spec:
+  prompt: You are a legal agent. You are responsible for reviewing the output of the supervisor agent and ensuring it is compliant with the laws and regulations of the company. Also anonymize any company names or other sensitive information.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      name: supervisor-agent-as-tool
+

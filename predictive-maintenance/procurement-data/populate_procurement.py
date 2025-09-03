@@ -11,38 +11,38 @@ from pathlib import Path
 
 # Part categories and their typical stock characteristics
 PART_CATEGORIES = {
-    'BEAR': {'min_stock': 10, 'reorder_point': 25, 'cost_range': (15.0, 150.0)},
-    'SEAL': {'min_stock': 15, 'reorder_point': 30, 'cost_range': (5.0, 45.0)},
-    'GREASE': {'min_stock': 20, 'reorder_point': 50, 'cost_range': (8.0, 25.0)},
-    'OIL': {'min_stock': 25, 'reorder_point': 60, 'cost_range': (12.0, 35.0)},
-    'FILTER': {'min_stock': 8, 'reorder_point': 20, 'cost_range': (20.0, 80.0)},
-    'GASKET': {'min_stock': 12, 'reorder_point': 30, 'cost_range': (3.0, 18.0)},
-    'MOTOR': {'min_stock': 3, 'reorder_point': 8, 'cost_range': (200.0, 800.0)},
-    'BELT': {'min_stock': 15, 'reorder_point': 35, 'cost_range': (25.0, 75.0)},
-    'PUMP': {'min_stock': 2, 'reorder_point': 5, 'cost_range': (150.0, 500.0)},
-    'VALVE': {'min_stock': 5, 'reorder_point': 15, 'cost_range': (80.0, 300.0)},
-    'GEAR': {'min_stock': 4, 'reorder_point': 10, 'cost_range': (120.0, 400.0)},
-    'HEAT': {'min_stock': 6, 'reorder_point': 15, 'cost_range': (45.0, 180.0)},
-    'TUBE': {'min_stock': 8, 'reorder_point': 20, 'cost_range': (30.0, 120.0)},
-    'FAN': {'min_stock': 3, 'reorder_point': 8, 'cost_range': (90.0, 250.0)},
-    'TOWER': {'min_stock': 2, 'reorder_point': 5, 'cost_range': (500.0, 1500.0)},
-    'NOZZLE': {'min_stock': 10, 'reorder_point': 25, 'cost_range': (15.0, 60.0)},
-    'DRIFT': {'min_stock': 8, 'reorder_point': 20, 'cost_range': (25.0, 80.0)},
-    'FIN': {'min_stock': 12, 'reorder_point': 30, 'cost_range': (8.0, 35.0)},
-    'IMPELLER': {'min_stock': 3, 'reorder_point': 8, 'cost_range': (180.0, 450.0)},
-    'SHAFT': {'min_stock': 4, 'reorder_point': 10, 'cost_range': (200.0, 600.0)},
-    'CHAIN': {'min_stock': 6, 'reorder_point': 15, 'cost_range': (40.0, 120.0)},
-    'SPROCKET': {'min_stock': 5, 'reorder_point': 12, 'cost_range': (35.0, 95.0)},
-    'ACTUATOR': {'min_stock': 4, 'reorder_point': 10, 'cost_range': (250.0, 800.0)},
-    'POSITIONER': {'min_stock': 3, 'reorder_point': 8, 'cost_range': (180.0, 500.0)},
-    'ELEMENT': {'min_stock': 10, 'reorder_point': 25, 'cost_range': (15.0, 65.0)},
-    'HOUSING': {'min_stock': 6, 'reorder_point': 15, 'cost_range': (45.0, 150.0)},
-    'SWITCH': {'min_stock': 8, 'reorder_point': 20, 'cost_range': (25.0, 80.0)},
-    'RELAY': {'min_stock': 12, 'reorder_point': 30, 'cost_range': (18.0, 55.0)},
-    'FUSE': {'min_stock': 20, 'reorder_point': 50, 'cost_range': (5.0, 25.0)},
-    'LUBRICANT': {'min_stock': 15, 'reorder_point': 35, 'cost_range': (12.0, 40.0)},
-    'PINION': {'min_stock': 4, 'reorder_point': 10, 'cost_range': (95.0, 280.0)},
-    'RACK': {'min_stock': 3, 'reorder_point': 8, 'cost_range': (120.0, 350.0)}
+    'BEAR': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (15.0, 150.0)},
+    'SEAL': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (5.0, 45.0)},
+    'GREASE': {'min_stock': 2, 'reorder_point': 4, 'cost_range': (8.0, 25.0)},
+    'OIL': {'min_stock': 2, 'reorder_point': 4, 'cost_range': (12.0, 35.0)},
+    'FILTER': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (20.0, 80.0)},
+    'GASKET': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (3.0, 18.0)},
+    'MOTOR': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (200.0, 800.0)},
+    'BELT': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (25.0, 75.0)},
+    'PUMP': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (150.0, 500.0)},
+    'VALVE': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (80.0, 300.0)},
+    'GEAR': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (120.0, 400.0)},
+    'HEAT': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (45.0, 180.0)},
+    'TUBE': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (30.0, 120.0)},
+    'FAN': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (90.0, 250.0)},
+    'TOWER': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (500.0, 1500.0)},
+    'NOZZLE': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (15.0, 60.0)},
+    'DRIFT': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (25.0, 80.0)},
+    'FIN': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (8.0, 35.0)},
+    'IMPELLER': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (120.0, 450.0)},
+    'SHAFT': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (200.0, 600.0)},
+    'CHAIN': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (40.0, 120.0)},
+    'SPROCKET': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (35.0, 95.0)},
+    'ACTUATOR': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (250.0, 800.0)},
+    'POSITIONER': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (180.0, 500.0)},
+    'ELEMENT': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (15.0, 65.0)},
+    'HOUSING': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (45.0, 150.0)},
+    'SWITCH': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (25.0, 80.0)},
+    'RELAY': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (18.0, 55.0)},
+    'FUSE': {'min_stock': 2, 'reorder_point': 4, 'cost_range': (5.0, 25.0)},
+    'LUBRICANT': {'min_stock': 1, 'reorder_point': 3, 'cost_range': (12.0, 40.0)},
+    'PINION': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (95.0, 280.0)},
+    'RACK': {'min_stock': 0, 'reorder_point': 2, 'cost_range': (120.0, 350.0)}
 }
 
 # Supplier names for variety
@@ -84,7 +84,7 @@ def generate_stock_data(parts_list):
             cost_range = config['cost_range']
             
             # Generate realistic current stock (sometimes below reorder point)
-            if random.random() < 0.3:  # 30% chance of low stock
+            if random.random() < 0.9:  # 90% chance of low stock
                 current_stock = random.randint(0, reorder_point - 1)
             else:
                 current_stock = random.randint(reorder_point, reorder_point * 3)

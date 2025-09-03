@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: MCPServer
+metadata:
+  name: procurement
+spec:
+  address:
+    valueFrom:
+      serviceRef:
+        name: procurement
+  transport: http
+  timeout: 120s
+  description: "Procurement MCP server"

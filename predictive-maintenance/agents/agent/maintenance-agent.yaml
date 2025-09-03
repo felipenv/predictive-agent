@@ -1,0 +1,14 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: maintenance-operator
+spec:
+  prompt: You specialize in fetching equipment and parts information from the database. Using the tools provided, you will fetch the information and return it to the user.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      labelSelector:
+        matchLabels:
+          mcp/server: maintenance
+

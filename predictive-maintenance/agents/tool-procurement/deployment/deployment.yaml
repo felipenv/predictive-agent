@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: procurement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: procurement
+  template:
+    metadata:
+      labels:
+        app: procurement
+    spec:
+      containers:
+      - name: procurement
+        image: procurement:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PORT
+          value: "8000"
+        envFrom:
+        - secretRef:
+            name: optimus-database-secret
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "1024Mi"
+            cpu: "1000m"

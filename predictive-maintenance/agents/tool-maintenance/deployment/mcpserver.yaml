@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: MCPServer
+metadata:
+  name: maintenance
+spec:
+  address:
+    valueFrom:
+      serviceRef:
+        name: maintenance
+  transport: http
+  timeout: 120s
+  description: "Maintenance MCP server"
