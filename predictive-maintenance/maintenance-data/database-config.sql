@@ -32,14 +32,10 @@ CREATE INDEX IF NOT EXISTS idx_service_parts_part ON maintenance.service_parts(p
 
 -- Add comments for documentation
 COMMENT ON SCHEMA maintenance IS 'Schema for maintenance-related data including service manuals and parts';
-COMMENT ON TABLE maintenance.service_manual IS 'Service manual information for equipment maintenance';
+COMMENT ON TABLE maintenance.service_manual IS 'Service manual information for equipment maintenance including part numbers';
 COMMENT ON COLUMN maintenance.service_manual.unique_id IS 'Unique identifier for the equipment (matches the MLRun dataset unique_id)';
 COMMENT ON COLUMN maintenance.service_manual.service_description IS 'Description of the maintenance service required';
-
-COMMENT ON TABLE maintenance.service_parts IS 'Detailed parts list with quantities for each equipment maintenance service';
-COMMENT ON COLUMN maintenance.service_parts.equipment_id IS 'Foreign key to service_manual.unique_id';
-COMMENT ON COLUMN maintenance.service_parts.part IS 'Part number or description';
-COMMENT ON COLUMN maintenance.service_parts.quantity IS 'Quantity of parts required for the service';
+COMMENT ON COLUMN maintenance.service_manual.part_numbers IS 'Array of part numbers needed for this maintenance service';
 
 
 -- Grant permissions (adjust as needed for your setup)
