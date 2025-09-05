@@ -25,7 +25,7 @@ def read_service_manual(manual_file):
     # Create a meaningful service description
     service_description = f"{equipment_type} - Comprehensive maintenance service including inspection, lubrication, and parts replacement"
     
-    return service_description
+    return service_description, content
 
 def read_parts_list(parts_file):
     """Read parts list and parse part,quantity pairs."""
@@ -53,8 +53,8 @@ def generate_sql_inserts():
         
         if manual_file.exists() and parts_file.exists():
             # Read service manual
-            service_description = read_service_manual(manual_file)
-            service_manual_inserts.append((unique_id, service_description))
+            service_description, service_manual_content = read_service_manual(manual_file)
+            service_manual_inserts.append((unique_id, service_description, service_manual_content))
             
             # Read parts
             parts = read_parts_list(parts_file)
@@ -63,7 +63,7 @@ def generate_sql_inserts():
     
     return service_manual_inserts, parts_inserts
 
-def insert_data_to_database(host, database, user, password, port=5432):
+def insert_data_to_database(host, database, user, password, port=5432, clear_existing=True):
     """Insert data directly into PostgreSQL database."""
     
     service_manual_inserts, parts_inserts = generate_sql_inserts()
@@ -84,14 +84,17 @@ def insert_data_to_database(host, database, user, password, port=5432):
         cursor = conn.cursor()
         
         # Clear existing data (optional)
-        print("Clearing existing data...")
-        cursor.execute("DELETE FROM maintenance.service_parts")
-        cursor.execute("DELETE FROM maintenance.service_manual")
+        if clear_existing:
+            print("Clearing existing data...")
+            cursor.execute("DELETE FROM maintenance.service_parts")
+            cursor.execute("DELETE FROM maintenance.service_manual")
+        else:
+            print("Preserving existing data, updating records...")
         
         # Insert service manuals using execute_values for efficiency
         print(f"Inserting {len(service_manual_inserts)} service manuals...")
         service_manual_query = """
-            INSERT INTO maintenance.service_manual (unique_id, service_description) 
+            INSERT INTO maintenance.service_manual (unique_id, service_description, service_manual) 
             VALUES %s
         """
         execute_values(cursor, service_manual_query, service_manual_inserts)
@@ -161,13 +164,23 @@ def main():
         print(f"  User: {DB_CONFIG['user']}")
         print(f"  Port: {DB_CONFIG['port']}")
         
-        # Ask for confirmation
-        response = input("\nDo you want to proceed with database insertion? (y/N): ")
-        if response.lower() != 'y':
+        # Ask for confirmation and data handling preference
+        print("\nData handling options:")
+        print("1. Replace all existing data (default)")
+        print("2. Update existing records with new service_manual content")
+        print("3. Cancel")
+        
+        choice = input("\nChoose an option (1/2/3): ").strip()
+        
+        if choice == '3':
             print("Database insertion cancelled.")
             return
-        
-        insert_data_to_database(**DB_CONFIG)
+        elif choice == '2':
+            print("Updating existing records with service manual content...")
+            insert_data_to_database(**DB_CONFIG, clear_existing=False)
+        else:
+            print("Replacing all existing data...")
+            insert_data_to_database(**DB_CONFIG, clear_existing=True)
         print("\n🎉 Data ingestion completed successfully!")
         print("\nNext steps:")
         print("1. Verify the data in your database")

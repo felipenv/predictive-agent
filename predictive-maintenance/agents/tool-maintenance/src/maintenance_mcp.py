@@ -141,6 +141,57 @@ def list_equipment_ids() -> str:
         return f"Error listing equipment: {str(e)}"
 
 @mcp.tool
+def get_full_service_manual(
+    unique_id: Annotated[int, Field(description="Unique identifier for the equipment (1-100)")]
+) -> str:
+    """
+    Fetch the complete service manual content for a given equipment unique_id.
+    Returns the full service manual content from the database.
+    """
+    try:
+        if unique_id < 1 or unique_id > 100:
+            return f"Error: unique_id must be between 1 and 100. Got: {unique_id}"
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get service manual information including full content
+        cursor.execute("""
+            SELECT 
+                sm.unique_id,
+                sm.service_description,
+                sm.service_manual
+            FROM maintenance.service_manual sm
+            WHERE sm.unique_id = %s
+        """, (unique_id,))
+        
+        service_manual = cursor.fetchone()
+        if not service_manual:
+            return f"No service manual found for equipment with unique_id: {unique_id}"
+        
+        unique_id_db, service_description, service_manual_content = service_manual
+        
+        # Format the response
+        result = f"## Complete Service Manual for Equipment {unique_id}\n\n"
+        result += f"**Equipment ID:** {unique_id_db}\n"
+        result += f"**Service Description:** {service_description}\n\n"
+        result += "---\n\n"
+        
+        if service_manual_content:
+            result += service_manual_content
+        else:
+            result += "**Note:** Complete service manual content not available in database.\n"
+            result += "The service description is available, but the detailed manual content has not been loaded."
+        
+        cursor.close()
+        conn.close()
+        
+        return result
+        
+    except Exception as e:
+        return f"Error fetching full service manual: {str(e)}"
+
+@mcp.tool
 def get_equipment_parts(
     equipment_id: Annotated[int, Field(description="Equipment ID (unique_id) to get parts for")]
 ) -> str:

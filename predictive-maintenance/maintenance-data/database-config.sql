@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS maintenance.service_manual (
     id SERIAL PRIMARY KEY,
     unique_id INTEGER NOT NULL,
     service_description TEXT NOT NULL,
+    service_manual TEXT,
     UNIQUE(unique_id)
 );
 
@@ -32,10 +33,10 @@ CREATE INDEX IF NOT EXISTS idx_service_parts_part ON maintenance.service_parts(p
 
 -- Add comments for documentation
 COMMENT ON SCHEMA maintenance IS 'Schema for maintenance-related data including service manuals and parts';
-COMMENT ON TABLE maintenance.service_manual IS 'Service manual information for equipment maintenance including part numbers';
+COMMENT ON TABLE maintenance.service_manual IS 'Service manual information for equipment maintenance';
 COMMENT ON COLUMN maintenance.service_manual.unique_id IS 'Unique identifier for the equipment (matches the MLRun dataset unique_id)';
 COMMENT ON COLUMN maintenance.service_manual.service_description IS 'Description of the maintenance service required';
-COMMENT ON COLUMN maintenance.service_manual.part_numbers IS 'Array of part numbers needed for this maintenance service';
+COMMENT ON COLUMN maintenance.service_manual.service_manual IS 'Complete service manual content in markdown format';
 
 
 -- Grant permissions (adjust as needed for your setup)

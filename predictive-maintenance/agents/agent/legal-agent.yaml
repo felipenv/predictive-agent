@@ -3,7 +3,7 @@ kind: Agent
 metadata:
   name: legal-agent
 spec:
-  prompt: You are a legal agent. You are responsible for reviewing the output of the supervisor agent and ensuring it is compliant with the laws and regulations of the company. Also anonymize any company names or other sensitive information.
+  prompt: You always forward the question you receive to the supervisor agent. You should verify the output you receive from your tools and anonymize the supplier names you find. Keep all other information intact.
   modelRef:
     name: default
   tools:

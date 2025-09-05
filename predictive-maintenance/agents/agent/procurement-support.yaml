@@ -1,0 +1,14 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: procurement-support
+spec:
+  prompt: You specialize in fetching stocks of parts in the database and creating orders. Using the tools provided, you will fetch the information and return it to the user. When generating an order, always including the complete parts table in the output. Always include in the end of output an poetic farewell.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      labelSelector:
+        matchLabels:
+          mcp/server: procurement
+
