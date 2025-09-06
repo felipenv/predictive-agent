@@ -164,20 +164,70 @@ def describe_model(
     tag: Annotated[str, Field(description="Tag of the model (ex: 'latest')")],
 ) -> str:
     """Get a description of a specific model artifact including its metadata, metrics and data sources."""
-    model_artifact = project.get_artifact(key=key, tag=tag)
-    report = []
-    report.append(f"Model: {key}:{tag}")
-    report.append(f"Workflow ID: {model_artifact.labels['workflow-id']}")
-    report.append(f"Framework: {model_artifact.spec.framework}")
-    report.append(f"Algorithm: {model_artifact.spec.algorithm}")
-    report.append(f"Repr: {model_artifact.parameters['repr']}")
-    report.append(f"Metrics: {model_artifact.metrics}")
-    report.append("Data Sources:")
-    for source in model_artifact.spec.sources:
-        artifact = mlrun.get_dataitem(source["path"]).meta
-        key, tag, _ = _get_artifact_key_tag(artifact)
-        report.append(f"{source['name']}: {key}:{tag}")
-    return "\n".join(report)
+    try:
+        model_artifact = project.get_artifact(key=key, tag=tag)
+        report = []
+        report.append(f"Model: {key}:{tag}")
+        
+        # Handle labels safely
+        if hasattr(model_artifact, 'labels') and model_artifact.labels:
+            workflow_id = model_artifact.labels.get('workflow-id', 'N/A')
+            report.append(f"Workflow ID: {workflow_id}")
+        else:
+            report.append("Workflow ID: N/A")
+        
+        # Handle spec safely
+        if hasattr(model_artifact, 'spec') and model_artifact.spec:
+            framework = getattr(model_artifact.spec, 'framework', 'N/A')
+            algorithm = getattr(model_artifact.spec, 'algorithm', 'N/A')
+            report.append(f"Framework: {framework}")
+            report.append(f"Algorithm: {algorithm}")
+            
+            # Handle data sources safely
+            if hasattr(model_artifact.spec, 'sources') and model_artifact.spec.sources:
+                report.append("Data Sources:")
+                for source in model_artifact.spec.sources:
+                    try:
+                        if isinstance(source, dict) and 'path' in source and 'name' in source:
+                            artifact = mlrun.get_dataitem(source["path"]).meta
+                            source_key, source_tag, _ = _get_artifact_key_tag(artifact)
+                            report.append(f"{source['name']}: {source_key}:{source_tag}")
+                        else:
+                            report.append(f"Source: {str(source)}")
+                    except Exception as e:
+                        report.append(f"Source: {str(source)} (Error: {str(e)})")
+            else:
+                report.append("Data Sources: None")
+        else:
+            report.append("Framework: N/A")
+            report.append("Algorithm: N/A")
+            report.append("Data Sources: N/A")
+        
+        # Handle parameters safely
+        if hasattr(model_artifact, 'parameters') and model_artifact.parameters:
+            repr_val = model_artifact.parameters.get('repr', 'N/A')
+            report.append(f"Repr: {repr_val}")
+        else:
+            report.append("Repr: N/A")
+        
+        # Handle metrics safely
+        if hasattr(model_artifact, 'metrics') and model_artifact.metrics:
+            report.append(f"Metrics: {model_artifact.metrics}")
+        else:
+            report.append("Metrics: None")
+        
+        # Add basic artifact info
+        if hasattr(model_artifact, 'uri'):
+            report.append(f"URI: {model_artifact.uri}")
+        if hasattr(model_artifact, 'created'):
+            report.append(f"Created: {model_artifact.created}")
+        if hasattr(model_artifact, 'updated'):
+            report.append(f"Updated: {model_artifact.updated}")
+        
+        return "\n".join(report)
+        
+    except Exception as e:
+        return f"Error describing model {key}:{tag}: {str(e)}"
 
 
 @mcp.tool
