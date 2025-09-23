@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: MCPServer
+metadata:
+  name: mlrun-predictive
+spec:
+  address:
+    valueFrom:
+      serviceRef:
+        name: mlrun-predictive
+  transport: http
+  timeout: 120s
+  description: "MLRun Predictive Maintenance MCP server"

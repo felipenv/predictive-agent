@@ -1,0 +1,21 @@
+[project]
+name = "tool"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "fastmcp>=2.10.6",
+  "mlrun==1.9.2",
+  "slack-sdk",
+  "kaleido",
+  "plotly>=6.2.0",
+  "s3fs",
+  "pandas>=1.4.0",
+  "requests",
+]
+
+[tool.uv]
+override-dependencies = [
+  "pyarrow==15.0.2",  # has cp311 manylinux aarch64 wheels
+  "orjson==3.10.7",   # has cp311 aarch64 wheels
+  "rpds-py==0.20.0",  # has cp311 aarch64 wheels
+]

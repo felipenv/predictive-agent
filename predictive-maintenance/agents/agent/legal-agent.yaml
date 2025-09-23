@@ -1,0 +1,12 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Agent
+metadata:
+  name: legal-agent
+spec:
+  prompt: You always forward the question you receive to the supervisor agent. You should verify the output you receive from your tools and anonymize the supplier names you find. Keep all other information intact.
+  modelRef:
+    name: default
+  tools:
+    - type: custom
+      name: supervisor-agent-as-tool
+

@@ -1,0 +1,17 @@
+apiVersion: ark.mckinsey.com/v1alpha1
+kind: Tool
+metadata:
+  name: procurement-agent-as-tool
+spec:
+  type: agent
+  description: A tool to perform procurement operations.
+  inputSchema:
+    type: object
+    properties:
+      question:
+        description: A question or an action request related to procurement database and order generation to be performed by the agent.
+        type: string
+    required:
+    - question
+  agent:
+    name: procurement-operator
