@@ -1,0 +1,36 @@
+{{- if .Values.postgresql.enabled }}
+# PostgreSQL Deployment Complete!
+
+## Step 1: Verify PostgreSQL is running
+kubectl get pods -l app.kubernetes.io/name=postgresql,release={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+## Step 2: Check PostgreSQL logs
+kubectl logs -l app.kubernetes.io/name=postgresql,release={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+## Step 3: Connect to PostgreSQL
+kubectl port-forward svc/{{ .Release.Name }}-postgresql 5432:5432 -n {{ .Release.Namespace }}
+
+## Step 4: Database Details
+- Host: {{ .Release.Name }}-postgresql
+- Port: {{ .Values.postgresql.database.port }}
+- Database: {{ .Values.postgresql.database.name }}
+- Username: {{ .Values.postgresql.secrets.username }}
+- Password: {{ .Values.postgresql.secrets.password }}
+
+## Step 5: Test connection
+psql -h localhost -p 5432 -U {{ .Values.postgresql.secrets.username }} -d {{ .Values.postgresql.database.name }}
+
+## Step 6: Next Steps
+Once PostgreSQL is running, you can deploy Keycloak:
+```bash
+helm install idp ../keycloak -n keycloak
+```
+
+## Service Information
+The PostgreSQL service is available at:
+- Service Name: {{ .Release.Name }}-postgresql
+- Port: {{ .Values.postgresql.primary.service.port }}
+- Type: {{ .Values.postgresql.primary.service.type }}
+
+This service name will be used by Keycloak to connect to the database.
+{{- end }} 
