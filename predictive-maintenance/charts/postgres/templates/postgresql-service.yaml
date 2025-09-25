@@ -1,0 +1,20 @@
+{{- if .Values.postgresql.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgres
+  labels:
+    app: postgres
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.postgresql.primary.service.type }}
+  ports:
+    - port: {{ .Values.postgresql.primary.service.port }}
+      targetPort: postgresql
+      protocol: TCP
+      name: postgresql
+  selector:
+    app: postgres
+    release: {{ .Release.Name }}
+{{- end }} 
