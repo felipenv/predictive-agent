@@ -10,7 +10,7 @@ DB_CONFIG = {
     'database': 'optimus',         # Your database name  
     'user': 'optimus',       # Your username
     'password': 'optimus',   # Your password
-    'port': 31117                   # Your PostgreSQL port
+    'port': 31877                   # Your PostgreSQL port
 }
 
 # Alternative: Use environment variables for security
